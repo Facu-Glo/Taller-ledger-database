@@ -22,4 +22,4 @@ ledger-*.tar
 # Temporary files, for example, from tests.
 /tmp/
 
-ledger
+/ledger
