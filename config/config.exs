@@ -1,6 +1,6 @@
 import Config
 
-#TODO usar variables de entorno
+# TODO usar variables de entorno
 config :ledger, Ledger.Repo,
   database: "midb",
   username: "postgres",

@@ -11,5 +11,4 @@ defmodule Ledger.Transacciones.Transaccion do
     belongs_to :cuenta_origen, Ledger.Cuentas.Cuenta
     belongs_to :cuenta_destino, Ledger.Cuentas.Cuenta
   end
-  
 end
