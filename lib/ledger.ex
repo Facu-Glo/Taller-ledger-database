@@ -1,18 +1,6 @@
 defmodule Ledger do
-  @moduledoc """
-  Documentation for `Ledger`.
-  """
-
-  @doc """
-  Hello world.
-
-  ## Examples
-
-      iex> Ledger.hello()
-      :world
-
-  """
-  def hello do
-    :world
+  def main(args) do
+    IO.puts("Hello, Ledger!")
+    IO.inspect(args)
   end
 end

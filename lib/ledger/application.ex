@@ -8,6 +8,7 @@ defmodule Ledger.Application do
   @impl true
   def start(_type, _args) do
     children = [
+      Ledger.Repo
       # Starts a worker by calling: Ledger.Worker.start_link(arg)
       # {Ledger.Worker, arg}
     ]
