@@ -1,11 +1,23 @@
 defmodule Ledger do
   alias Ledger.Parser.Parser
+  alias Ledger.Usuarios.HandleUsuario
 
   def main(args) do
     case Parser.parser_args(args) do
-      {:transacciones, config} -> IO.inspect(config)
-      {:balance, config} -> IO.inspect(config)
-      {:error, config} -> IO.inspect(config)
+      {:crear_usuario, params} -> HandleUsuario.handle({:crear_usuario, params})
+      {:editar_usuario, params} -> HandleUsuario.handle({:editar_usuario, params})
+      {:borrar_usuario, params} -> IO.inspect({:borrar_usuario, params})
+      {:ver_usuario, params} -> IO.inspect({:ver_usuario, params})
+      {:crear_moneda, params} -> IO.inspect({:crear_moneda, params})
+      {:editar_moneda, params} -> IO.inspect({:editar_moneda, params})
+      {:borrar_moneda, params} -> IO.inspect({:borrar_moneda, params})
+      {:ver_moneda, params} -> IO.inspect({:ver_moneda, params})
+      {:alta_cuenta, params} -> IO.inspect({:alta_cuenta, params})
+      {:realizar_transferencia, params} -> IO.inspect({:realizar_transferencia, params})
+      {:realizar_swap, params} -> IO.inspect({:realizar_swap, params})
+      {:deshacer_transaccion, params} -> IO.inspect({:deshacer_transaccion, params})
+      {:ver_transaccion, params} -> IO.inspect({:ver_transaccion, params})
+      {:error, reason} -> IO.inspect({:error, reason})
     end
   end
 end
