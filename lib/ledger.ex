@@ -6,8 +6,9 @@ defmodule Ledger do
     case Parser.parser_args(args) do
       {:crear_usuario, params} -> HandleUsuario.handle({:crear_usuario, params})
       {:editar_usuario, params} -> HandleUsuario.handle({:editar_usuario, params})
+      {:ver_usuario, params} -> HandleUsuario.handle({:ver_usuario, params})
+
       {:borrar_usuario, params} -> IO.inspect({:borrar_usuario, params})
-      {:ver_usuario, params} -> IO.inspect({:ver_usuario, params})
       {:crear_moneda, params} -> IO.inspect({:crear_moneda, params})
       {:editar_moneda, params} -> IO.inspect({:editar_moneda, params})
       {:borrar_moneda, params} -> IO.inspect({:borrar_moneda, params})

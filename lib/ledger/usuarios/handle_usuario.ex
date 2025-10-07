@@ -3,7 +3,7 @@ defmodule Ledger.Usuarios.HandleUsuario do
     crear_usuario: &Ledger.Usuarios.UsuarioFunc.crear_usuario/1,
     editar_usuario: &Ledger.Usuarios.UsuarioFunc.editar_usuario/1,
     # borrar_usuario: &Ledger.Usuarios.UsuarioFunc.borrar_usuario/1,
-    # ver_usuario: &Ledger.Usuarios.UsuarioFunc.ver_usuario/1
+    ver_usuario: &Ledger.Usuarios.UsuarioFunc.ver_usuario/1
   }
 
   def handle({accion, params}) do

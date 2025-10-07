@@ -2,6 +2,7 @@ defmodule Ledger.Usuarios.UsuarioFunc do
   alias Ledger.Repo
 
   # === Funciones Helpers === #
+
   defp setear_fechas(attrs) do
     fecha_nac =
       case Map.get(attrs, :fecha_nacimiento) do
@@ -44,6 +45,14 @@ defmodule Ledger.Usuarios.UsuarioFunc do
     end
   end
 
+  defp output(error = {:error, _}) do
+    Ledger.HandleError.handle_usuario(error)
+  end
+
+  defp output(tupla) do
+    IO.inspect(tupla)
+  end
+
   # === Funciones === #
 
   def crear_usuario({:ok, attrs}) do
@@ -70,11 +79,13 @@ defmodule Ledger.Usuarios.UsuarioFunc do
     end
   end
 
-  def output(error = {:error, _}) do
-    Ledger.HandleError.handle_usuario(error)
-  end
-
-  def output(tupla) do
-    IO.inspect(tupla)
+  def ver_usuario({:ok, attrs}) do
+     case obtener_usuario(attrs) do
+      nil -> 
+        {:error, :user_not_found} |> output()
+      usuario -> 
+        {:ok, res = usuario}
+        output(res)
+     end
   end
 end
