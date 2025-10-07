@@ -10,6 +10,8 @@ defmodule Ledger.HandleError do
       :invalid_update ->
         IO.inspect({:error, editar_usuario: "No se pudo actualizar el usuario."})
 
+      :invalid_age ->
+        IO.inspect({:error, crear_usuario: "El usuario debe ser mayor de 18 años."})
       _ ->
         IO.puts("Error desconocido: #{inspect(reason)}")
     end

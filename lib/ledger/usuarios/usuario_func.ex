@@ -23,10 +23,14 @@ defmodule Ledger.Usuarios.UsuarioFunc do
   defp insertar_usuario(changeset) do
     case Repo.insert(changeset) do
       {:ok, usuario} ->
-        {:ok, usuario}
+        {:usuario, usuario}
 
       {:error, _} ->
-        {:error, :user_exists}
+        cond do
+          changeset.errors[:fecha_nacimiento] != nil -> {:error, :invalid_age}
+          changeset.errors[:nombre] != nil -> {:error, :user_exists}
+          true -> {:error, :unknown_error}
+        end
     end
   end
 
@@ -40,7 +44,7 @@ defmodule Ledger.Usuarios.UsuarioFunc do
 
   defp actualizar_usuario(changeset) do
     case Repo.update(changeset) do
-      {:ok, usuario} -> {:ok, usuario}
+      {:ok, usuario} -> {:usuario, usuario}
       {:error, _} -> {:error, :invalid_update}
     end
   end
@@ -50,7 +54,7 @@ defmodule Ledger.Usuarios.UsuarioFunc do
   end
 
   defp output(tupla) do
-    IO.inspect(tupla)
+    Ledger.HandleOutput.handle(tupla)
   end
 
   # === Funciones === #
@@ -60,7 +64,7 @@ defmodule Ledger.Usuarios.UsuarioFunc do
 
     %Ledger.Usuarios.Usuario{}
     |> Ledger.Usuarios.Usuario.changeset(attrs)
-    |> insertar_usuario()
+    |> insertar_usuario
     |> output()
   end
 
@@ -80,12 +84,13 @@ defmodule Ledger.Usuarios.UsuarioFunc do
   end
 
   def ver_usuario({:ok, attrs}) do
-     case obtener_usuario(attrs) do
-      nil -> 
+    case obtener_usuario(attrs) do
+      nil ->
         {:error, :user_not_found} |> output()
-      usuario -> 
-        {:ok, res = usuario}
-        output(res)
-     end
+
+      usuario ->
+        {:usuario, usuario}
+        |> output()
+    end
   end
 end
