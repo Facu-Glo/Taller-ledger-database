@@ -14,10 +14,7 @@ defmodule Ledger.Usuarios.UsuarioFunc do
           Date.new!(String.to_integer(y), String.to_integer(m), String.to_integer(d))
       end
 
-    attrs = Map.put(attrs, :fecha_nacimiento, fecha_nac)
-    hoy = Date.utc_today()
-    attrs = Map.merge(attrs, %{fecha_creacion: hoy, fecha_edicion: hoy})
-    attrs
+    Map.put(attrs, :fecha_nacimiento, fecha_nac)
   end
 
   defp insertar_usuario(changeset) do
@@ -39,8 +36,9 @@ defmodule Ledger.Usuarios.UsuarioFunc do
     Repo.get(Ledger.Usuarios.Usuario, id)
   end
 
-  defp build_editar_changeset(attrs, usuario),
-    do: Ledger.Usuarios.Usuario.changeset(usuario, attrs)
+  defp build_editar_changeset(attrs, usuario) do
+    Ledger.Usuarios.Usuario.changeset(usuario, attrs)
+  end
 
   defp actualizar_usuario(changeset) do
     case Repo.update(changeset) do
@@ -74,12 +72,16 @@ defmodule Ledger.Usuarios.UsuarioFunc do
         {:error, :user_not_found} |> output()
 
       usuario ->
-        attrs
-        |> Map.put(:nombre, attrs[:nuevo_nombre])
-        |> Map.put(:fecha_edicion, Date.utc_today())
-        |> build_editar_changeset(usuario)
-        |> actualizar_usuario()
-        |> output()
+        nuevo_nombre = attrs[:nuevo_nombre]
+
+        if usuario.nombre == nuevo_nombre do
+          {:error, :same_name} |> output()
+        else
+          %{nombre: nuevo_nombre}
+          |> build_editar_changeset(usuario)
+          |> actualizar_usuario()
+          |> output()
+        end
     end
   end
 

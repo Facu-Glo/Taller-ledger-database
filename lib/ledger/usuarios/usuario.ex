@@ -5,16 +5,14 @@ defmodule Ledger.Usuarios.Usuario do
   schema "usuarios" do
     field :nombre, :string
     field :fecha_nacimiento, :date
-    field :fecha_creacion, :date
-    field :fecha_edicion, :date
 
-    has_many :cuentas, Ledger.Cuentas.Cuenta
+    timestamps(inserted_at: :fecha_creacion, updated_at: :fecha_edicion, type: :utc_datetime)
   end
 
   def changeset(usuario, attrs) do
     usuario
-    |> cast(attrs, [:nombre, :fecha_nacimiento, :fecha_creacion, :fecha_edicion])
-    |> validate_required([:nombre, :fecha_nacimiento, :fecha_creacion, :fecha_edicion])
+    |> cast(attrs, [:nombre, :fecha_nacimiento])
+    |> validate_required([:nombre, :fecha_nacimiento])
     |> unsafe_validate_unique(:nombre, Ledger.Repo)
     |> unique_constraint(:nombre)
     |> validate_age()
