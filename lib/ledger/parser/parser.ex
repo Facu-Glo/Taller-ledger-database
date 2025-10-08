@@ -79,10 +79,25 @@ defmodule Ledger.Parser.Parser do
   end
 
   defp parse_moneda_flags(flags) do
-    parse_flags(flags, %{
-      "-n" => :nombre,
-      "-p" => :precio
-    })
+    with {:ok, map} <- parse_flags(flags, %{"-n" => :nombre, "-p" => :precio}),
+         {:ok, num} <- parse_precio(map) do
+      {:ok, Map.put(map, :precio_usd, num)}
+    else
+      error -> error
+    end
+  end
+
+  defp parse_precio(map) do
+    case Map.fetch(map, :precio) do
+      {:ok, valor} ->
+        case Float.parse(valor) do
+          {num, ""} -> {:ok, num}
+          _ -> {:error, :precio_invalid}
+        end
+
+      :error ->
+        {:ok, nil}
+    end
   end
 
   defp parse_editar_moneda_flags(flags) do
