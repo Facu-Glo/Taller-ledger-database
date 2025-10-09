@@ -50,4 +50,31 @@ defmodule Ledger.HandleError do
         IO.puts("Ocurrió un error desconocido al crear la moneda: #{inspect(reason)}")
     end
   end
+
+  def handle_transacciones({:error, reason}) do
+    case reason do
+      :user_not_found ->
+        IO.inspect({:error, alta_cuenta: "No se encontró el usuario."})
+
+      :moneda_not_found ->
+        IO.inspect({:error, alta_cuenta: "No se encontró la moneda."})
+
+      :invalid_amount ->
+        IO.inspect({:error, alta_cuenta: "El monto debe ser un número positivo."})
+
+      :insufficient_funds ->
+        IO.inspect({:error, transferencia: "Fondos insuficientes para realizar la transferencia."})
+
+      :cuenta_origen_no_existe -> 
+        IO.puts("Error: El usuario origen no tiene cuenta activa en esta moneda")
+      
+      :cuenta_destino_no_existe -> 
+        IO.puts("Error: El usuario destino no tiene cuenta activa en esta moneda")
+      
+      :cuenta_ya_existe -> 
+        IO.puts("Error: Ya existe una cuenta activa para este usuario en esta moneda")
+      _ ->
+        IO.puts("Ocurrió un error desconocido en la transacción: #{inspect(reason)}")
+    end
+  end
 end

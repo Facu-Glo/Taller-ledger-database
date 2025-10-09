@@ -108,32 +108,54 @@ defmodule Ledger.Parser.Parser do
   end
 
   defp parse_alta_cuenta_flags(flags) do
-    parse_flags(flags, %{
-      "-u" => :id_usuario,
-      "-m" => :id_moneda
-    })
+    with {:ok, map} <-
+           parse_flags(flags, %{
+             "-u" => :usuario_destino_id,
+             "-m" => :moneda_origen_id,
+             "-a" => :monto
+           }),
+         {:ok, monto} <- parse_float(map[:monto]) do
+      {:ok, Map.put(map, :monto, monto)}
+    end
   end
 
   defp parse_transferencia_flags(flags) do
-    parse_flags(flags, %{
-      "-o" => :usuario_origen,
-      "-d" => :usuario_destino,
-      "-m" => :id_moneda,
-      "-c" => :monto
-    })
+    with {:ok, map} <-
+           parse_flags(flags, %{
+             "-o" => :usuario_origen_id,
+             "-d" => :usuario_destino_id,
+             "-m" => :moneda_id,
+             "-a" => :monto
+           }),
+         {:ok, monto} <- parse_float(map[:monto]) do
+      {:ok, Map.put(map, :monto, monto)}
+    end
   end
 
   defp parse_swap_flags(flags) do
-    parse_flags(flags, %{
-      "-u" => :id_usuario,
-      "-mo" => :moneda_origen,
-      "-md" => :moneda_destino,
-      "-c" => :monto
-    })
+    with {:ok, map} <-
+           parse_flags(flags, %{
+             "-u" => :id_usuario,
+             "-mo" => :moneda_origen,
+             "-md" => :moneda_destino,
+             "-c" => :monto
+           }),
+         {:ok, monto} <- parse_float(map[:c]) do
+      {:ok, Map.put(map, :monto, monto)}
+    end
   end
 
   defp parse_id_flag(flags) do
     parse_flags(flags, %{"-id" => :id})
+  end
+
+  defp parse_float(nil), do: {:error, :invalid_float}
+
+  defp parse_float(str) do
+    case Float.parse(str) do
+      {num, ""} -> {:ok, num}
+      _ -> {:error, :invalid_float}
+    end
   end
 
   # === PARSEO GENERAL ===
