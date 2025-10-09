@@ -10,3 +10,5 @@ config :ledger, Ledger.Repo,
 
 config :ledger,
   ecto_repos: [Ledger.Repo]
+
+config :logger, level: :info
