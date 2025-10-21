@@ -1,177 +1,53 @@
 defmodule Ledger.Parser.Parser do
-  def parser_args([]), do: {:error, :invalid_subcommand}
-
-  # === USUARIOS ===
-  def parser_args(["crear_usuario" | flags]),
-    do: wrap_command(:crear_usuario, parse_usuario_flags(flags))
-
-  def parser_args(["editar_usuario" | flags]),
-    do: wrap_command(:editar_usuario, parse_editar_usuario_flags(flags))
-
-  def parser_args(["borrar_usuario" | flags]),
-    do: wrap_command(:borrar_usuario, parse_id_flag(flags))
-
-  def parser_args(["ver_usuario" | flags]),
-    do: wrap_command(:ver_usuario, parse_id_flag(flags))
-
-  # === MONEDAS ===
-  def parser_args(["crear_moneda" | flags]),
-    do: wrap_command(:crear_moneda, parse_moneda_flags(flags))
-
-  def parser_args(["editar_moneda" | flags]),
-    do: wrap_command(:editar_moneda, parse_editar_moneda_flags(flags))
-
-  def parser_args(["borrar_moneda" | flags]),
-    do: wrap_command(:borrar_moneda, parse_id_flag(flags))
-
-  def parser_args(["ver_moneda" | flags]),
-    do: wrap_command(:ver_moneda, parse_id_flag(flags))
-
-  # === CUENTAS / TRANSACCIONES ===
-  def parser_args(["alta_cuenta" | flags]),
-    do: wrap_command(:alta_cuenta, parse_alta_cuenta_flags(flags))
-
-  def parser_args(["realizar_transferencia" | flags]),
-    do: wrap_command(:realizar_transferencia, parse_transferencia_flags(flags))
-
-  def parser_args(["realizar_swap" | flags]),
-    do: wrap_command(:realizar_swap, parse_swap_flags(flags))
-
-  def parser_args(["deshacer_transaccion" | flags]),
-    do: wrap_command(:deshacer_transaccion, parse_id_flag(flags))
-
-  def parser_args(["ver_transaccion" | flags]),
-    do: wrap_command(:ver_transaccion, parse_id_flag(flags))
-
-  def parser_args(_), do: {:error, :invalid_subcommand}
-
-  # === HELPERS ===
+  alias Ledger.Parser.{Usuarios, Monedas, Transacciones}
 
   defp wrap_command(command, {:ok, map}), do: {command, {:ok, map}}
   defp wrap_command(_command, {:error, reason}), do: {:error, reason}
 
-  # === PARSEOS ===
+  def parser_args(["crear_usuario" | flags]),
+    do: wrap_command(:crear_usuario, Usuarios.parse_crear(flags))
 
-  defp parse_usuario_flags(flags) do
-    required = [:nombre, :fecha_nacimiento]
+  def parser_args(["editar_usuario" | flags]),
+    do: wrap_command(:editar_usuario, Usuarios.parse_editar(flags))
 
-    case parse_flags(flags, %{"-n" => :nombre, "-b" => :fecha_nacimiento}) do
-      {:ok, map} ->
-        missing = Enum.filter(required, fn key -> !Map.has_key?(map, key) end)
-        if missing == [], do: {:ok, map}, else: {:error, {:missing_flags, missing}}
+  def parser_args(["ver_usuario" | flags]),
+    do: wrap_command(:ver_usuario, Usuarios.parse_id(flags))
 
-      error ->
-        error
-    end
-  end
+  def parser_args(["borrar_usuario" | flags]),
+    do: wrap_command(:borrar_usuario, Usuarios.parse_id(flags))
 
-  defp parse_editar_usuario_flags(flags) do
-    required = [:id, :nuevo_nombre]
+  def parser_args(["crear_moneda" | flags]),
+    do: wrap_command(:crear_moneda, Monedas.parse_crear(flags))
 
-    case parse_flags(flags, %{"-id" => :id, "-n" => :nuevo_nombre}) do
-      {:ok, map} ->
-        missing = Enum.filter(required, fn key -> !Map.has_key?(map, key) end)
-        if missing == [], do: {:ok, map}, else: {:error, {:missing_flags, missing}}
+  def parser_args(["editar_moneda" | flags]),
+    do: wrap_command(:editar_moneda, Monedas.parse_editar(flags))
 
-      error ->
-        error
-    end
-  end
+  def parser_args(["ver_moneda" | flags]),
+    do: wrap_command(:ver_moneda, Monedas.parse_id(flags))
 
-  defp parse_moneda_flags(flags) do
-    with {:ok, map} <- parse_flags(flags, %{"-n" => :nombre, "-p" => :precio}),
-         {:ok, num} <- parse_precio(map) do
-      {:ok, Map.put(map, :precio_usd, num)}
-    else
-      error -> error
-    end
-  end
+  def parser_args(["borrar_moneda" | flags]),
+    do: wrap_command(:borrar_moneda, Monedas.parse_id(flags))
 
-  defp parse_precio(map) do
-    case Map.fetch(map, :precio) do
-      {:ok, valor} ->
-        case Float.parse(valor) do
-          {num, ""} -> {:ok, num}
-          _ -> {:error, :precio_invalid}
-        end
+  def parser_args(["alta_cuenta" | flags]),
+    do: wrap_command(:alta_cuenta, Transacciones.parse_alta_cuenta(flags))
 
-      :error ->
-        {:ok, nil}
-    end
-  end
+  def parser_args(["realizar_transferencia" | flags]),
+    do: wrap_command(:realizar_transferencia, Transacciones.parse_transferencia(flags))
 
-  defp parse_editar_moneda_flags(flags) do
-    parse_flags(flags, %{
-      "-id" => :id,
-      "-p" => :nuevo_precio
-    })
-  end
+  def parser_args(["realizar_swap" | flags]),
+    do: wrap_command(:realizar_swap, Transacciones.parse_swap(flags))
 
-  defp parse_alta_cuenta_flags(flags) do
-    with {:ok, map} <-
-           parse_flags(flags, %{
-             "-u" => :usuario_destino_id,
-             "-m" => :moneda_origen_id,
-             "-a" => :monto
-           }),
-         {:ok, monto} <- parse_float(map[:monto]) do
-      {:ok, Map.put(map, :monto, monto)}
-    end
-  end
+  def parser_args(["deshacer_transaccion" | flags]),
+    do: wrap_command(:deshacer_transaccion, Transacciones.parse_id(flags))
 
-  defp parse_transferencia_flags(flags) do
-    with {:ok, map} <-
-           parse_flags(flags, %{
-             "-o" => :usuario_origen_id,
-             "-d" => :usuario_destino_id,
-             "-m" => :moneda_id,
-             "-a" => :monto
-           }),
-         {:ok, monto} <- parse_float(map[:monto]) do
-      {:ok, Map.put(map, :monto, monto)}
-    end
-  end
+  def parser_args(["ver_transaccion" | flags]),
+    do: wrap_command(:ver_transaccion, Transacciones.parse_id(flags))
 
-  defp parse_swap_flags(flags) do
-    with {:ok, map} <-
-           parse_flags(flags, %{
-             "-u" => :id_usuario,
-             "-mo" => :moneda_origen,
-             "-md" => :moneda_destino,
-             "-c" => :monto
-           }),
-         {:ok, monto} <- parse_float(map[:c]) do
-      {:ok, Map.put(map, :monto, monto)}
-    end
-  end
+  def parser_args(["balance" | flags]),
+    do: wrap_command(:balance, Transacciones.parse_balance(flags))
 
-  defp parse_id_flag(flags) do
-    parse_flags(flags, %{"-id" => :id})
-  end
+  def parser_args(["listar_transacciones" | flags]),
+    do: wrap_command(:listar_transacciones, Transacciones.parse_id_tp1(flags))
 
-  defp parse_float(nil), do: {:error, :invalid_float}
-
-  defp parse_float(str) do
-    case Float.parse(str) do
-      {num, ""} -> {:ok, num}
-      _ -> {:error, :invalid_float}
-    end
-  end
-
-  # === PARSEO GENERAL ===
-  defp parse_flags(flags, mapping) do
-    Enum.reduce_while(flags, {:ok, %{}}, fn flag, {:ok, acc} ->
-      case String.split(flag, "=", parts: 2) do
-        [key, value] ->
-          if Map.has_key?(mapping, key) do
-            {:cont, {:ok, Map.put(acc, mapping[key], value)}}
-          else
-            {:halt, {:error, {:unknown_flag, flag}}}
-          end
-
-        _ ->
-          {:halt, {:error, {:unknown_flag, flag}}}
-      end
-    end)
-  end
+  def parser_args(_), do: {:error, :invalid_subcommand}
 end

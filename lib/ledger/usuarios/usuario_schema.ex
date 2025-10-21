@@ -1,4 +1,4 @@
-defmodule Ledger.Usuarios.Usuario do
+defmodule Ledger.Usuarios.UsuarioSchema do
   use Ecto.Schema
   import Ecto.Changeset
 

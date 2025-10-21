@@ -1,4 +1,4 @@
-defmodule Ledger.Monedas.Moneda do
+defmodule Ledger.Monedas.MonedaSchema do
   use Ecto.Schema
   import Ecto.Changeset
 
